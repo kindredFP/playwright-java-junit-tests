@@ -45,7 +45,7 @@ public class TestExample {
     @AfterEach
     void closeContext() {
         context.tracing().stop(new Tracing.StopOptions()
-                .setPath(Paths.get("trace.zip")));
+                .setPath(Paths.get("trace" + context.hashCode() + ".zip")));
         context.close();
     }
 
