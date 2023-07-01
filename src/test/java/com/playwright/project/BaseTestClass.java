@@ -3,8 +3,6 @@ package com.playwright.project;
 import com.microsoft.playwright.*;
 import org.junit.jupiter.api.*;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,7 +12,7 @@ import java.util.Properties;
 // Subclasses will inherit PER_CLASS behavior.
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Slf4j
-class TestFixtures {
+class BaseTestClass {
     // Shared between all tests in the class.
     Playwright playwright;
     Browser browser;
