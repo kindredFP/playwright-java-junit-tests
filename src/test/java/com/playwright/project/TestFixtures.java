@@ -29,10 +29,11 @@ class TestFixtures {
     void launchBrowser() {
         log.info("Loading properties file");
         properties = loadProperties("test.properties");
-        boolean headless = Boolean.valueOf(properties.getProperty("headless"));
 
         playwright = Playwright.create();
-        browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(headless));
+        browser = playwright.chromium().launch(new BrowserType.LaunchOptions()
+                .setHeadless(Boolean.valueOf(properties.getProperty("headless")))
+        );
     }
 
     @AfterAll
@@ -42,35 +43,32 @@ class TestFixtures {
 
     @BeforeEach
     void createContextAndPage() {
-        log.info("Starting new context");
         context = browser.newContext();
-
-        // Start tracing before creating / navigating a page.
+        log.info("Starting new context [" + context.hashCode() +"]");
         setupTracing();
 
         page = context.newPage();
     }
 
     private void setupTracing() {
+        log.info("Setting up tracing options");
         context.tracing().start(new Tracing.StartOptions()
-                .setScreenshots(true)
-                .setSnapshots(true)
-                .setSources(true));
+                .setScreenshots(Boolean.valueOf(getPropertyValue("screenshots")))
+                .setSnapshots(Boolean.valueOf(getPropertyValue("snapshots")))
+                .setSources(Boolean.valueOf(getPropertyValue("sources"))));
     }
 
     @AfterEach
     void closeContext() {
-        log.info("This trace is saved " + "trace" + context.hashCode()+".zip");
+        log.info("This trace is saved " + "trace" + context.hashCode() + ".zip");
         context.tracing().stop(new Tracing.StopOptions()
-                .setPath(Paths.get("trace" + context.hashCode() + ".zip")));
+                .setPath(Paths.get(getPropertyValue("traceDirectory")+"trace" + context.hashCode() + ".zip")));
         context.close();
     }
 
-    public void testWithPropertiesFile() throws IOException {
-        properties = loadProperties("test.properties");
-        // Use the loaded properties in your test code
-        String value = properties.getProperty("headless");
-        // ...
+    public static String getPropertyValue(String value) {
+        log.info("Grabbing property value [" + value + "] from property file");
+        return properties.getProperty(value);
     }
 
     private Properties loadProperties(String fileName) {
@@ -78,7 +76,7 @@ class TestFixtures {
         try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(fileName)) {
             properties.load(inputStream);
         } catch (IOException e) {
-            //Log
+            log.error("Properties file did not load successfully");
         }
         return properties;
     }
